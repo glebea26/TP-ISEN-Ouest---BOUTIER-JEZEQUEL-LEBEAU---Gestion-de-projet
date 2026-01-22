@@ -158,6 +158,24 @@ h1, h2, h3 {
     margin: 5px auto;
 }
 
+/* Taille max du popup Leaflet */
+.leaflet-popup-content {
+    max-width: 260px !important;
+    max-height: 300px !important;   /* 👈 hauteur max */
+    overflow-y: auto !important;    /* 👈 scroll vertical */
+    overflow-x: hidden;
+    padding-right: 6px;             /* évite que le scroll colle au texte */
+}
+
+/* Images dans popup */
+.popup-img {
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+    border-radius: 6px;
+    display: block;
+    margin: 5px auto;
+}
 
 
 /* --- Footer --- */

@@ -136,8 +136,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 map.options.closePopupOnClick = false;
 
+
 L.Popup.prototype.options.maxWidth = 280;
 L.Popup.prototype.options.minWidth = 200;
+L.Popup.prototype.options.maxHeight = 320; // 👈 clé pour le scroll
+
 
 
 const dateFixe = "22/01/2026";
