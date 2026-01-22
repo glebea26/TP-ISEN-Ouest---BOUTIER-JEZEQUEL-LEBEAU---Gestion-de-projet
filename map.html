@@ -6,7 +6,7 @@
 <title>Carte des zones polluées – Littoral de Brest</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+<link rel="stylesheet" href="styles.css">
 <style>
 body { margin:0;font-family:Arial,sans-serif; }
 .map-container { padding:20px; }
@@ -49,16 +49,31 @@ body { margin:0;font-family:Arial,sans-serif; }
 }
 .modal-content button { margin:5px; }
 
-/* Bravo Trashmon popup */
-.bravo-popup .leaflet-popup-content-wrapper {
-  background:#f1c40f;
-  border-radius:10px;
-  text-align:center;
-  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+/* Popup BRAVO Trashmon */
+#bravoTrashmonPopup {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #f1c40f;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+  z-index: 10000;
 }
-.bravo-popup .leaflet-popup-content img {
+#bravoTrashmonPopup img {
   max-width:150px;
   margin-top:10px;
+}
+#bravoTrashmonPopup button {
+  margin-top:10px;
+  padding:5px 10px;
+  border:none;
+  border-radius:5px;
+  background:#2ecc71;
+  color:#fff;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -69,7 +84,7 @@ body { margin:0;font-family:Arial,sans-serif; }
 <h1>Carte des zones polluées</h1>
 <nav>
 <a href="index.html">Accueil</a> |
-<a href="map.html" class="active">Carte</a> |
+<a href="map.html">Carte</a> |
 <a href="gallerie.html">Galerie</a> |
 <a href="collection.html">Collection</a> |
 <a href="profile.html">Profil</a>
@@ -120,7 +135,6 @@ function setCookie(name,value,days=365){
     d.setTime(d.getTime() + (days*24*60*60*1000));
     document.cookie = name + "=" + value + ";path=/;expires=" + d.toUTCString();
 }
-
 function getCookie(name){
     const cname = name + "=";
     const decoded = decodeURIComponent(document.cookie);
@@ -316,27 +330,21 @@ function passToGreen(marker){
     ${adminButton}
   `).openPopup();
 
-  // Popup BRAVO Trashmon
+  // Popup BRAVO Trashmon flottant
   if(!getCookie("lastTrashmon")){
       const randomIndex = Math.floor(Math.random() * trashmons.length);
       const pokemonImg = trashmons[randomIndex];
       setCookie("lastTrashmon", pokemonImg, 1);
 
-      L.popup({
-        closeButton:true,
-        autoClose:true,
-        className:'bravo-popup',
-        offset: L.point(0, -marker.options.radius)
-      })
-      .setLatLng(marker.getLatLng())
-      .setContent(`
-        <div style="text-align:center;">
-          <h3>🎉 Bravo !</h3>
-          <p>Vous avez gagné un Trashmon !</p>
-          <img src="${pokemonImg}" class="popup-img">
-        </div>
-      `)
-      .openOn(map);
+      const bravoDiv = document.createElement("div");
+      bravoDiv.id = "bravoTrashmonPopup";
+      bravoDiv.innerHTML = `
+        <h3>🎉 Bravo !</h3>
+        <p>Vous avez gagné un Trashmon !</p>
+        <img src="${pokemonImg}" style="max-width:150px;margin-top:10px;">
+        <br><button onclick="document.body.removeChild(this.parentElement)">Fermer</button>
+      `;
+      document.body.appendChild(bravoDiv);
   }
 }
 
