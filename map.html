@@ -134,6 +134,15 @@ let pendingLatLng=null;
 let pendingType=null;
 const LIKES_REQUIRED=3;
 
+// Liste des Trashmons
+const trashmons = [
+  "ressources/trashmons/trashmon1.png",
+  "ressources/trashmons/trashmon2.png",
+  "ressources/trashmons/trashmon3.png",
+  "ressources/trashmons/trashmon4.png",
+  "ressources/trashmons/trashmon5.png"
+];
+
 /* ==========================
    🔴 ROUGES CODÉS EN DUR
 ========================== */
@@ -275,7 +284,7 @@ function likeZone(){
 }
 
 /* ==========================
-   🟢 PASSAGE VERT
+   🟢 PASSAGE VERT + Pokémon aléatoire
 ========================== */
 function passToGreen(marker){
   marker.status="green";
@@ -286,13 +295,18 @@ function passToGreen(marker){
     adminButton = `<br><button onclick="deleteGreenPoint()">🗑️ Supprimer ce point</button>`;
   }
 
-  // Affiche toujours la date
   const dateStr = new Date().toLocaleString();
+
+  // Pokémon aléatoire
+  const randomIndex = Math.floor(Math.random() * trashmons.length);
+  const pokemonImg = trashmons[randomIndex];
 
   marker.bindPopup(`
     🟢 Déchets récupérés<br>
     <em>${dateStr}</em><br><br>
-    <img src="${marker.afterPhoto}" class="popup-img">
+    <img src="${marker.afterPhoto}" class="popup-img"><br>
+    <strong>🎉 Bravo ! Vous avez gagné un Trashmon :</strong><br>
+    <img src="${pokemonImg}" class="popup-img">
     ${adminButton}
   `);
 
@@ -324,7 +338,6 @@ function deleteGreenPoint(){
 
   m.status="green";
   m.afterPhoto="https://via.placeholder.com/300x200?text=Après";
-  const dateStr = new Date().toLocaleString();
 
   m.bindPopup(`
     🟢 Déchets récupérés<br>
@@ -367,4 +380,3 @@ function deleteGreenPoint(){
 </script>
 </body>
 </html>
-
