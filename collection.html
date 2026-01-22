@@ -151,7 +151,7 @@
             background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
             border-radius: 30px;
             padding: 0;
-            max-width: 600px;
+            max-width: 450px; /* Réduit pour éviter que ce soit trop grand */
             width: 90%;
             position: relative;
             animation: scaleIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -162,159 +162,103 @@
 
         .close-btn {
             position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            font-size: 1.8rem;
-            color: rgba(255, 255, 255, 0.9);
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: white;
             cursor: pointer;
             background: rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
             border: 2px solid rgba(255, 255, 255, 0.3);
-            width: 45px;
-            height: 45px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: all 0.3s ease;
             z-index: 10;
-            font-weight: 300;
-        }
-
-        .close-btn:hover {
-            background: rgba(255, 255, 255, 0.9);
-            color: #2e7d32;
-            transform: rotate(90deg) scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .modal-header {
             background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%);
-            padding: 3rem 2rem 2rem;
+            padding: 1.5rem 1rem 1rem;
             position: relative;
             overflow: hidden;
         }
 
-        .modal-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-
         .modal-image-container {
-            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
+            padding: 1rem;
         }
 
         .modal-image {
             width: 100%;
-            max-width: 350px;
+            max-width: 220px; /* Réduit de 350px à 220px */
             height: auto;
-            max-height: 350px;
+            max-height: 220px; /* Réduit pour lisibilité */
             object-fit: contain;
-            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.3));
             animation: floatBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            position: relative;
-            z-index: 2;
-        }
-
-        @keyframes floatBounce {
-            0% { 
-                transform: translateY(100px) scale(0.5);
-                opacity: 0;
-            }
-            60% { 
-                transform: translateY(-20px) scale(1.05);
-            }
-            80% { 
-                transform: translateY(10px) scale(0.95);
-            }
-            100% { 
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
         }
 
         .modal-body {
-            padding: 2.5rem;
+            padding: 2rem;
             background: white;
+            text-align: center;
         }
 
         .modal-title {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1.5rem;
-            text-align: center;
+            margin-bottom: 1rem;
             font-weight: 900;
-            letter-spacing: -0.5px;
-            animation: slideUp 0.5s ease 0.2s both;
             text-transform: uppercase;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
         }
 
         .modal-description {
             color: #555;
-            line-height: 1.8;
-            text-align: center;
-            font-size: 1.05rem;
-            padding: 0 1rem;
-            animation: slideUp 0.5s ease 0.3s both;
-            position: relative;
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        .modal-description::before {
-            content: '⚡';
-            display: block;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            animation: rotate 2s linear infinite;
+        /* --- Nouveau bouton Fermer en bas --- */
+        .btn-footer {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+            text-transform: uppercase;
+            margin-top: 10px;
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .btn-footer:hover {
+            background: #2e7d32;
+            transform: scale(1.05);
         }
 
         .stat-badge {
             display: inline-block;
-            background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%);
-            color: white;
-            padding: 0.5rem 1.2rem;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 0.4rem 1rem;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
-            margin-top: 1.5rem;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-            animation: slideUp 0.5s ease 0.4s both;
+            margin-bottom: 10px;
         }
 
-        /* --- Footer --- */
         footer {
             text-align: center;
             padding: 20px;
@@ -375,7 +319,6 @@
         </div>
     </main>
 
-    <!-- Modal -->
     <div class="modal" id="trashmonModal">
         <div class="modal-content">
             <button class="close-btn" id="closeModal">&times;</button>
@@ -387,11 +330,10 @@
             </div>
             
             <div class="modal-body">
+                <div class="stat-badge">STATUT : COLLECTÉ ✓</div>
                 <h3 class="modal-title" id="modalTitle"></h3>
                 <p class="modal-description" id="modalDescription"></p>
-                <div style="text-align: center;">
-                    <span class="stat-badge" id="statBadge">COLLECTÉ ✓</span>
-                </div>
+                <button class="btn-footer" id="closeBtnFooter">Fermer</button>
             </div>
         </div>
     </div>
@@ -401,44 +343,42 @@
     </footer>
 
     <script>
-        // Données des Trashmons avec fun facts
         const trashmonData = {
             canette: {
                 name: "Canette Grincheuse",
                 image: "ressources/trashmons/trashmon_canette.png",
-                description: "Toujours de mauvaise humeur, elle pétille de colère ! Son attaque signature ? Le 'Pschitt Explosif' qui surprend ses adversaires. Fun fact : elle met 200 ans à se décomposer, largement le temps de râler ! 🥫"
+                description: "Toujours de mauvaise humeur, elle pétille de colère ! Son attaque signature ? Le 'Pschitt Explosif'. Fun fact : elle met 200 ans à se décomposer ! 🥫"
             },
             megot: {
                 name: "Mégot Ninja",
                 image: "ressources/trashmons/trashmon_megot.png",
-                description: "Maître de la furtivité urbaine ! Il se cache partout et pollue en silence. Son point faible ? L'eau ! Fun fact : un seul mégot peut contaminer 500L d'eau. Un vrai vilain discret ! 🥷"
+                description: "Maître de la furtivité urbaine ! Il se cache partout. Fun fact : un seul mégot peut contaminer 500L d'eau. Un vrai vilain ! 🥷"
             },
             carton: {
                 name: "Carton Hérissé",
                 image: "ressources/trashmons/trashmon_carton.png",
-                description: "Ne touche pas ses pointes ou tu vas le regretter ! Recyclable à l'infini, il renaît toujours de ses cendres comme un phénix... en carton. Il adore les jeux de mots 'car-tonnants' ! 📦"
+                description: "Ne touche pas ses pointes ! Recyclable à l'infini, il renaît toujours comme un phénix... en carton. 📦"
             },
             plastique: {
                 name: "Bouteille Furieuse",
                 image: "ressources/trashmons/trashmon_plastique.png",
-                description: "Sous pression depuis 1950 ! Cette bouteille déborde d'énergie et n'aime PAS qu'on la jette dans la nature. Elle peut mettre 450 ans à disparaître - autant dire qu'elle a le temps de te poursuivre ! 💢"
+                description: "Sous pression depuis 1950 ! Elle peut mettre 450 ans à disparaître. Elle a le temps de vous poursuivre ! 💢"
             },
             verre: {
                 name: "Verre Coupant",
                 image: "ressources/trashmons/trashmon_verre.png",
-                description: "Fragile mais MORTEL ! Champion du recyclage infini, il peut renaître éternellement sans perdre sa qualité. Attention : son attaque 'Éclat Tranchant' fait très mal aux pieds ! Un classique des plages... malheureusement. ✨"
+                description: "Fragile mais MORTEL ! Champion du recyclage infini, il peut renaître éternellement sans perdre sa qualité. ✨"
             }
         };
 
-        // Sélection des éléments
         const modal = document.getElementById('trashmonModal');
         const closeBtn = document.getElementById('closeModal');
+        const closeBtnFooter = document.getElementById('closeBtnFooter');
         const modalImage = document.getElementById('modalImage');
         const modalTitle = document.getElementById('modalTitle');
         const modalDescription = document.getElementById('modalDescription');
         const trashmonCards = document.querySelectorAll('.trashmon-card:not(.locked)');
 
-        // Ouvrir la modal au clic
         trashmonCards.forEach(card => {
             card.addEventListener('click', () => {
                 const trashmonType = card.getAttribute('data-trashmon');
@@ -453,23 +393,17 @@
             });
         });
 
-        // Fermer la modal
-        closeBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
+        // Fermeture par la croix, le bouton ou l'overlay
+        [closeBtn, closeBtnFooter].forEach(btn => {
+            btn.addEventListener('click', () => modal.classList.remove('active'));
         });
 
-        // Fermer en cliquant en dehors
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
+            if (e.target === modal) modal.classList.remove('active');
         });
 
-        // Fermer avec la touche Échap
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.classList.contains('active')) {
-                modal.classList.remove('active');
-            }
+            if (e.key === 'Escape') modal.classList.remove('active');
         });
     </script>
 </body>
