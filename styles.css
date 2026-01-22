@@ -27,7 +27,7 @@ header h1 {
     paint-order: stroke fill;
 }
 
-.trashmon{
+.trashmon {
     color: #b2ff59;
 }
 
@@ -78,6 +78,8 @@ main {
     padding: 20px;
     max-width: 1000px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 h1, h2, h3 {
@@ -89,39 +91,45 @@ h1, h2, h3 {
     text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; /* Centre le bouton et le texte horizontalement */
+    justify-content: center;
     gap: 10px;
-    margin: 30px 0;
+    margin: 30px auto;
+    width: 100%;
 }
 
 /* --- Boutons --- */
-.cta button, #capture-btn, #edit-profile-btn {
+.cta button, #capture-btn, #edit-profile-btn, .btn-footer {
     background-color: #4CAF50;
     color: white;
     border: none;
     padding: 12px 25px;
     font-size: 16px;
     font-weight: bold;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
     transition: background 0.3s, transform 0.2s;
 }
 
-.cta button:hover, #capture-btn:hover, #edit-profile-btn:hover {
+.cta button:hover, #capture-btn:hover, #edit-profile-btn:hover, .btn-footer:hover {
     background-color: #388E3C;
-    transform: scale(1.02);
+    transform: scale(1.05);
 }
 
-/* --- COMPTEUR LIVE ACTIVITY --- */
+/* --- COMPTEUR LIVE ACTIVITY (Centré) --- */
 .live-counter-container {
     background: #ffffff;
     border-radius: 15px;
     padding: 20px;
-    margin: 20px auto;
+    margin: 20px auto; /* Centre le bloc lui-même */
     max-width: 500px;
+    width: 90%;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     border: 1px solid #e0e0e0;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centre le contenu interne */
 }
 
 .live-badge {
@@ -151,9 +159,11 @@ h1, h2, h3 {
 }
 
 .live-event {
+    width: 100%;
+    box-sizing: border-box;
     font-size: 14px;
     color: #555;
-    padding: 10px;
+    padding: 15px;
     background: #f9f9f9;
     border-left: 4px solid #4CAF50;
     border-radius: 4px;
@@ -174,6 +184,24 @@ h1, h2, h3 {
     color: #4CAF50;
 }
 
+/* --- Fonctionnalités (Centrage de la liste) --- */
+.features {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.features ul {
+    list-style: none;
+    padding: 0;
+    display: inline-block;
+    text-align: left;
+}
+
+.features li {
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
 /* --- Collection & Cartes --- */
 .collection, .collection-grid {
     display: flex;
@@ -191,6 +219,7 @@ h1, h2, h3 {
     width: 120px;
     text-align: center;
     transition: transform 0.2s;
+    cursor: pointer;
 }
 
 .trashmon-card:hover {
@@ -202,6 +231,47 @@ h1, h2, h3 {
     height: 100px;
     object-fit: contain;
     margin-bottom: 10px;
+}
+
+/* --- Modal (Collection Detail) --- */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 25px;
+    max-width: 450px;
+    width: 90%;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%);
+    padding: 1.5rem;
+}
+
+.modal-image {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+}
+
+.modal-body {
+    padding: 2rem;
 }
 
 /* --- Footer --- */
