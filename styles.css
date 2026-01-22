@@ -249,6 +249,12 @@ h1, h2, h3 {
     display: flex;
 }
 
+nav a:hover, nav a.active {
+    background-color: white;
+    color: #4CAF50;
+}
+
+
 .modal-content {
     background: white;
     border-radius: 25px;
