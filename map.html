@@ -49,7 +49,7 @@
         <!-- Carte -->
         <div id="map" class="map"></div>
 
-        <p>Choisissez une zone rouge pour commencer votre nettoyage !</p>
+        <p>🔴 Déchets à ramasser | 🟢 Déchets récupérés</p>
     </div>
 </main>
 
@@ -61,31 +61,73 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Limites du littoral de Brest (zone jouable)
+    // Limites du littoral de Brest
     const littoralBrestBounds = L.latLngBounds(
-        [48.32, -4.65], // Sud-Ouest
-        [48.45, -4.35]  // Nord-Est
+        [48.32, -4.65],
+        [48.45, -4.35]
     );
 
     // Initialisation de la carte
     const map = L.map('map', {
         maxBounds: littoralBrestBounds,
-        maxBoundsViscosity: 1.0, // empêche de sortir de la zone
+        maxBoundsViscosity: 1.0,
         minZoom: 12,
         maxZoom: 17
     });
 
-    // Centrage et zoom automatique sur le littoral
     map.fitBounds(littoralBrestBounds);
 
-    // Fond de carte OpenStreetMap
+    // Fond OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
+    /* ==========================
+       🔴 Déchets à ramasser
+    ========================== */
+    const dechetsRouges = [
+        [48.382, -4.494],
+        [48.371, -4.477],
+        [48.405, -4.515],
+        [48.360, -4.450]
+    ];
+
+    dechetsRouges.forEach(coord => {
+        L.circleMarker(coord, {
+            radius: 10,
+            color: '#c0392b',
+            fillColor: '#e74c3c',
+            fillOpacity: 0.9,
+            weight: 2
+        })
+        .addTo(map)
+        .bindPopup("🔴 Déchets à ramasser");
+    });
+
+    /* ==========================
+       🟢 Déchets récupérés
+    ========================== */
+    const dechetsVerts = [
+        [48.388, -4.502],
+        [48.365, -4.468],
+        [48.410, -4.480]
+    ];
+
+    dechetsVerts.forEach(coord => {
+        L.circleMarker(coord, {
+            radius: 8,
+            color: '#1e8449',
+            fillColor: '#2ecc71',
+            fillOpacity: 0.9,
+            weight: 2
+        })
+        .addTo(map)
+        .bindPopup("🟢 Déchets récupérés");
+    });
 </script>
 
 </body>
 </html>
+
 
 
