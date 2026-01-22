@@ -3,31 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil utilisateur</title>
+    <title>Profil utilisateur - Trashmon Go</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Votre Profil</h1>
-    </header>
-    <main>
-        <div class="profile">
-            <h2>Nom : Léo</h2>
-            <p>Nombre de Trashmons capturés : 12</p>
-            <p>Impact : 50 kg de déchets collectés</p>
+
+<header class="banner">
+    <h1>Votre Profil</h1>
+    <nav>
+        <a href="index.html">Accueil</a> |
+        <a href="map.html">Carte</a> |
+        <a href="capture.html">Capture</a> |
+        <a href="collection.html">Collection</a> |
+        <a href="profile.html">Profil</a>
+    </nav>
+</header>
+
+<main>
+    <section class="profile-info">
+        <div class="profile-card">
+            <h2>Dresseur : Léo</h2>
+            <div class="stats">
+                <p><strong>Trashmons capturés :</strong> 12</p>
+                <p><strong>Impact écologique :</strong> 50 kg de déchets</p>
+            </div>
             <button id="edit-profile-btn">Modifier votre profil</button>
         </div>
-        <div class="trashmon-summary">
-            <h3>Trashmons sauvegardés</h3>
+    </section>
+
+    <section class="trashmon-summary">
+        <h3>Dernières captures</h3>
+        <div class="collection-grid">
             <div class="trashmon-card">
                 <img src="trashmon1.png" alt="Trashmon 1">
-                <p>Trashmon Canette Grincheuse</p>
+                <p>Canette Grincheuse</p>
             </div>
-            <!-- Ajouter plus de Trashmons ici -->
-        </div>
-    </main>
-    <footer>
-        <p>&copy; 2026 Trashmon Go - Tous droits réservés</p>
-    </footer>
+            </div>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2026 Trashmon Go - Tous droits réservés</p>
+</footer>
+
 </body>
 </html>
