@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carte des zones polluées – Littoral de Brest</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="styles.css" />
+
+<style>
+body { margin:0;font-family:Arial,sans-serif; }
+.map-container { padding:20px; }
+.map { height:500px;width:100%;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+
+.leaflet-popup-content {
+  max-width: 260px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.popup-img {
+  width:100%;
+  max-width:240px;
+  height:auto;
+  border-radius:6px;
+  display:block;
+  margin:5px auto;
+}
+
+#uploadModal,#beforeModal {
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,.6);
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+}
+
+.modal-content {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  width:300px;
+  text-align:center;
+}
+
+.modal-content button { margin:5px; }
+</style>
+</head>
+
+<body>
+
+<header class="banner">
+<h1>Carte des zones polluées</h1>
+<nav>
+<a href="index.html">Accueil</a> |
+<a href="map.html">Carte</a> |
+<a href="gallerie.html">Galerie</a> |
+<a href="collection.html">Collection</a> |
+<a href="profile.html">Profil</a>
+</nav>
+</header>
+
+<main>
+<div class="map-container">
+<h2>Repérez les zones polluées du littoral de Brest</h2>
+<div id="map" class="map"></div>
+<p style="text-align:center;margin-top:15px;">
+🔴 Déchets à ramasser | 🟠 À valider | 🟢 Déchets récupérés
+</p>
+</div>
+</main>
+
+<footer>
+<p>&copy; 2026 Trashmon Go - Tous droits réservés</p>
+</footer>
+
+<!-- Modal photo APRÈS -->
+<div id="uploadModal">
+  <div class="modal-content">
+    <h3>📸 Preuve APRÈS</h3>
+    <input type="file" id="photoInput" accept="image/*"><br><br>
+    <button id="sendPhotoBtn">Envoyer</button>
+    <button onclick="closeModal()">Annuler</button>
+  </div>
+</div>
+
+<!-- Modal photo AVANT -->
+<div id="beforeModal">
+  <div class="modal-content">
+    <h3>📷 Photo AVANT</h3>
+    <input type="file" id="beforePhotoInput" accept="image/*"><br><br>
+    <button id="sendBeforePhotoBtn">Valider</button>
+    <button onclick="closeBeforeModal()">Annuler</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ==========================
+// 🍪 GESTION DES COOKIES
+// ==========================
+function setCookie(name,value,days=365){
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = name + "=" + value + ";path=/;expires=" + d.toUTCString();
+}
+
+function getCookie(name){
+    const cname = name + "=";
+    const decoded = decodeURIComponent(document.cookie);
+    const ca = decoded.split(';');
+    for(let c of ca){
+        c = c.trim();
+        if(c.indexOf(cname) === 0) return c.substring(cname.length);
+    }
+    return "";
+}
+
+// ==========================
+// 🍪 RÉCUPÉRATION DU RÔLE (admin ou user)
+// ==========================
+const userRole = getCookie("userRole");
+const isAdmin = (userRole === "admin");
+
+// ==========================
+// INITIALISATION DE LA CARTE
+// ==========================
+const littoralBrestBounds = L.latLngBounds([[48.32,-4.65],[48.45,-4.35]]);
+const map = L.map('map',{maxBounds:littoralBrestBounds,maxBoundsViscosity:1,minZoom:12,maxZoom:17});
+map.fitBounds(littoralBrestBounds);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'© OpenStreetMap'
+}).addTo(map);
+
+L.Popup.prototype.options.maxWidth = 280;
+L.Popup.prototype.options.minWidth = 200;
+L.Popup.prototype.options.maxHeight = 320;
+
+let selectedMarker=null;
+let pendingLatLng=null;
+let pendingType=null;
+const LIKES_REQUIRED=3;
+
+// Liste des Trashmons
+const trashmons = [
+  "ressources/trashmons/trashmon_canette.png",
+  "ressources/trashmons/trashmon_carton.png",
+  "ressources/trashmons/trashmon_megot.png",
+  "ressources/trashmons/trashmon_plastique.png",
+  "ressources/trashmons/trashmon_verre.png"
+];
+
+/* ==========================
+   🔴 ROUGES CODÉS EN DUR
+========================= */
+[
+  [48.382,-4.494],
+  [48.371,-4.477],
+  [48.405,-4.515]
+].forEach(coord=>{
+  createRedMarker(coord,"Déchets divers","https://via.placeholder.com/300x200?text=Avant");
+});
+
+/* ==========================
+   🔴 CRÉATION DYNAMIQUE
+========================= */
+map.on('click',e=>{
+  const div=document.createElement('div');
+  div.innerHTML="<strong>Type de déchet :</strong><br>";
+  const select=document.createElement('select');
+  ["Plastique","Mégots","Cartons","Verre"].forEach(v=>{
+    const o=document.createElement('option');
+    o.value=v;o.text=v;select.appendChild(o);
+  });
+  const btn=document.createElement('button');
+  btn.innerText="Ajouter le point";
+  btn.onclick=()=>{
+    pendingLatLng=e.latlng;
+    pendingType=select.value;
+    document.getElementById("beforeModal").style.display="flex";
+    map.closePopup();
+  };
+  div.appendChild(select);
+  div.appendChild(document.createElement('br'));
+  div.appendChild(btn);
+  L.popup().setLatLng(e.latlng).setContent(div).openOn(map);
+});
+
+document.getElementById("sendBeforePhotoBtn").onclick=()=>{
+  const input=document.getElementById("beforePhotoInput");
+  if(!input.files.length){ alert("Photo AVANT obligatoire"); return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    createRedMarker(pendingLatLng,pendingType,e.target.result);
+    closeBeforeModal();
+  };
+  reader.readAsDataURL(input.files[0]);
+};
+
+function closeBeforeModal(){
+  document.getElementById("beforeModal").style.display="none";
+  document.getElementById("beforePhotoInput").value="";
+}
+function closeModal(){
+  document.getElementById("uploadModal").style.display="none";
+  document.getElementById("photoInput").value="";
+}
+
+/* ==========================
+   🔴 MARQUEUR ROUGE
+========================= */
+function createRedMarker(latlng,type,beforePhoto){
+  const marker=L.circleMarker(latlng,{
+    radius:10,color:'#c0392b',fillColor:'#e74c3c',fillOpacity:.9,weight:2
+  }).addTo(map);
+  marker.status="red";
+  marker.likes=0;
+  marker.beforePhoto=beforePhoto;
+  marker.afterPhoto=null;
+  marker.type=type;
+
+  marker.bindPopup(`
+    🔴 ${marker.type}<br>
+    <em>${new Date().toLocaleString()}</em><br><br>
+    <img src="${marker.beforePhoto}" class="popup-img"><br>
+    <button onclick="markAsCleaned()">Je l’ai nettoyée</button>
+  `);
+  marker.on("click",()=>selectedMarker=marker);
+}
+
+/* ==========================
+   🟠 PASSAGE ORANGE
+========================= */
+function markAsCleaned(){ if(!selectedMarker)return; document.getElementById("uploadModal").style.display="flex"; }
+
+document.getElementById("sendPhotoBtn").onclick=()=>{
+  const input=document.getElementById("photoInput");
+  if(!input.files.length){ alert("Photo APRÈS obligatoire"); return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    selectedMarker.afterPhoto=e.target.result;
+    passToOrange(selectedMarker);
+    closeModal();
+  };
+  reader.readAsDataURL(input.files[0]);
+};
+
+function passToOrange(marker){
+  marker.status="orange";
+  marker.likes=0;
+  marker.setStyle({radius:9,color:'#e67e22',fillColor:'#f39c12'});
+  updateOrangePopup(marker);
+}
+
+function updateOrangePopup(marker){
+  marker.bindPopup(`
+    🟠 Zone nettoyée<br>
+    👍 ${marker.likes}/${LIKES_REQUIRED}<br><br>
+    <strong>Avant</strong><br>
+    <img src="${marker.beforePhoto}" class="popup-img"><br>
+    <strong>Après</strong><br>
+    <img src="${marker.afterPhoto}" class="popup-img"><br>
+    <button onclick="likeZone()">J’ai vérifié</button>
+  `);
+  marker.openPopup();
+}
+
+/* ==========================
+   👍 LIKE
+========================= */
+function likeZone(){
+  if(!selectedMarker||selectedMarker.status!=="orange")return;
+  selectedMarker.likes++;
+  if(selectedMarker.likes>=LIKES_REQUIRED){
+    passToGreen(selectedMarker);
+  } else { updateOrangePopup(selectedMarker); }
+}
+
+/* ==========================
+   🟢 PASSAGE VERT + BRAVO
+========================= */
+function passToGreen(marker){
+  marker.status="green";
+  marker.setStyle({radius:8,color:'#1e8449',fillColor:'#2ecc71'});
+
+  let adminButton = isAdmin ? `<br><button onclick="deleteGreenPoint()">🗑️ Supprimer ce point</button>` : "";
+  const dateStr = new Date().toLocaleString();
+
+  marker.bindPopup(`
+    🟢 Déchets récupérés<br>
+    <em>${dateStr}</em><br><br>
+    <img src="${marker.afterPhoto}" class="popup-img">
+    ${adminButton}
+  `);
+  marker.openPopup();
+
+  // Vérifie cookie pour BRAVO Trashmon
+  if(!getCookie("lastTrashmon")){
+      const randomIndex = Math.floor(Math.random() * trashmons.length);
+      const pokemonImg = trashmons[randomIndex];
+      setCookie("lastTrashmon", pokemonImg, 1); // valable 1 jour
+
+      // Popup BRAVO
+      L.popup({closeButton:true,autoClose:true,className:'bravo-popup'})
+        .setLatLng(marker.getLatLng())
+        .setContent(`
+          <h3>🎉 Bravo !</h3>
+          <p>Vous avez gagné un Trashmon !</p>
+          <img src="${pokemonImg}" class="popup-img">
+        `)
+        .openOn(map);
+  }
+}
+
+/* ==========================
+   🟢 SUPPRESSION POINT VERT (ADMIN)
+========================= */
+function deleteGreenPoint(){
+  if(!isAdmin || !selectedMarker) return;
+  if(confirm("Supprimer définitivement ce point ?")){
+    map.removeLayer(selectedMarker);
+    selectedMarker=null;
+  }
+}
+
+/* ==========================
+   🟢 VERTS CODÉS EN DUR
+========================= */
+[
+  [48.388,-4.502],
+  [48.365,-4.468]
+].forEach(coord=>{
+  const m=L.circleMarker(coord,{
+    radius:8,color:'#1e8449',fillColor:'#2ecc71',fillOpacity:.9,weight:2
+  }).addTo(map);
+  m.status="green";
+  m.afterPhoto="https://via.placeholder.com/300x200?text=Après";
+  m.bindPopup(`
+    🟢 Déchets récupérés<br>
+    <em>22/01/2026</em><br><br>
+    <img src="${m.afterPhoto}" class="popup-img">
+    ${isAdmin ? '<br><button onclick="deleteGreenPoint()">🗑️ Supprimer ce point</button>' : ''}
+  `);
+  m.on("click",()=>selectedMarker=m);
+});
+
+/* ==========================
+   🟠 ORANGES CODÉS EN DUR
+========================= */
+[
+  [48.360,-4.450],
+  [48.410,-4.480]
+].forEach(coord=>{
+  const m=L.circleMarker(coord,{
+    radius:9,color:'#e67e22',fillColor:'#f39c12',fillOpacity:.9,weight:2
+  }).addTo(map);
+  m.status="orange";
+  m.likes=1;
+  m.beforePhoto="https://via.placeholder.com/300x200?text=Avant";
+  m.afterPhoto="https://via.placeholder.com/300x200?text=Après";
+  m.bindPopup(`
+    🟠 Zone nettoyée<br>
+    👍 ${m.likes}/${LIKES_REQUIRED}<br><br>
+    <strong>Avant</strong><br>
+    <img src="${m.beforePhoto}" class="popup-img"><br>
+    <strong>Après</strong><br>
+    <img src="${m.afterPhoto}" class="popup-img"><br>
+    <button onclick="likeZone()">J’ai vérifié</button>
+  `);
+  m.on("click",()=>selectedMarker=m);
+});
+</script>
+</body>
+</html>
