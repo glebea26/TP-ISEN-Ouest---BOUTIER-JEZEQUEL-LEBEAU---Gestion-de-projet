@@ -40,6 +40,30 @@
         .delete-btn:hover {
             background-color: #c0392b;
         }
+
+        /* Modal upload */
+        #uploadModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #uploadModal .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        #uploadModal button {
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
@@ -60,7 +84,7 @@
         <h2>Repérez les zones polluées du littoral de Brest</h2>
         <div id="map" class="map"></div>
         <p style="text-align: center; margin-top: 15px;">
-            🔴 Déchets à ramasser | 🟢 Déchets récupérés
+            🔴 Déchets à ramasser | 🟠 À valider | 🟢 Déchets récupérés
         </p>
     </div>
 </main>
@@ -69,9 +93,18 @@
     <p>&copy; 2026 Trashmon Go - Tous droits réservés</p>
 </footer>
 
+<!-- Modal upload -->
+<div id="uploadModal">
+    <div class="modal-content">
+        <h3>📸 Preuve de nettoyage</h3>
+        <input type="file" id="photoInput" accept="image/*" required><br><br>
+        <button id="sendPhotoBtn">Envoyer</button>
+        <button onclick="closeModal()">Annuler</button>
+    </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Limites du littoral de Brest
     const littoralBrestBounds = L.latLngBounds(
         [48.32, -4.65],
         [48.45, -4.35]
@@ -91,6 +124,7 @@
     }).addTo(map);
 
     const dateFixe = "22/01/2026";
+    let selectedMarker = null;
 
     /* Points rouges existants */
     const dechetsRouges = [
@@ -101,18 +135,26 @@
     ];
 
     dechetsRouges.forEach(coord => {
-        L.circleMarker(coord, {
+        const marker = L.circleMarker(coord, {
             radius: 10,
             color: '#c0392b',
             fillColor: '#e74c3c',
             fillOpacity: 0.9,
             weight: 2
-        })
-        .addTo(map)
-        .bindPopup(`🔴 Déchets à ramasser<br><em>Date : ${dateFixe}</em>`);
+        }).addTo(map);
+
+        marker.bindPopup(`
+            🔴 Déchets à ramasser<br>
+            <em>Date : ${dateFixe}</em><br><br>
+            <button onclick="markAsCleaned()">Je l’ai nettoyée</button>
+        `);
+
+        marker.on("click", () => {
+            selectedMarker = marker;
+        });
     });
 
-    /* Points verts existants avec suppression */
+    /* Points verts existants */
     const dechetsVertsCoords = [
         [48.388, -4.502],
         [48.365, -4.468],
@@ -144,13 +186,9 @@
         marker.bindPopup(popupContent);
     });
 
-    /* ==========================
-       Ajouter un point rouge avec liste déroulante
-    ========================== */
+    /* Ajouter un point rouge avec liste déroulante */
     map.on('click', function(e) {
-        // Créer une popup temporaire pour choisir le type de déchet
         const popupContent = document.createElement('div');
-
         popupContent.innerHTML = "<strong>Choisissez le type de déchet :</strong><br>";
 
         const select = document.createElement('select');
@@ -170,16 +208,25 @@
             const typeDechet = select.value;
             const now = new Date().toLocaleString();
 
-            L.circleMarker(e.latlng, {
+            const marker = L.circleMarker(e.latlng, {
                 radius: 10,
                 color: '#c0392b',
                 fillColor: '#e74c3c',
                 fillOpacity: 0.9,
                 weight: 2
-            }).addTo(map)
-            .bindPopup(`🔴 ${typeDechet}<br><em>Date : ${now}</em>`);
+            }).addTo(map);
 
-            map.closePopup(); // Ferme le popup temporaire
+            marker.bindPopup(`
+                🔴 ${typeDechet}<br>
+                <em>Date : ${now}</em><br><br>
+                <button onclick="markAsCleaned()">Je l’ai nettoyée</button>
+            `);
+
+            marker.on("click", () => {
+                selectedMarker = marker;
+            });
+
+            map.closePopup();
         };
 
         popupContent.appendChild(select);
@@ -191,9 +238,40 @@
          .setContent(popupContent)
          .openOn(map);
     });
+
+    function markAsCleaned() {
+        if (!selectedMarker) return;
+        document.getElementById("uploadModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("uploadModal").style.display = "none";
+        document.getElementById("photoInput").value = "";
+    }
+
+    document.getElementById("sendPhotoBtn").addEventListener("click", () => {
+        const fileInput = document.getElementById("photoInput");
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            alert("⛔ Une image est obligatoire pour valider le nettoyage.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        console.log("Image envoyée :", file.name);
+
+        selectedMarker.setStyle({
+            radius: 9,
+            color: '#e67e22',
+            fillColor: '#f39c12',
+            fillOpacity: 0.9
+        });
+
+        selectedMarker.setPopupContent("🟠 Zone nettoyée – en attente de validation");
+
+        closeModal();
+    });
 </script>
 
 </body>
 </html>
-
-
