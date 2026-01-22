@@ -25,24 +25,27 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .delete-btn {
-            display: inline-block;
-            padding: 4px 8px;
-            margin-top: 5px;
-            background-color: #e74c3c;
-            color: white;
-            font-size: 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        /* Popup scroll & sizing */
+        .leaflet-popup-content {
+            max-width: 260px !important;
+            max-height: 300px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            padding-right: 6px;
         }
 
-        .delete-btn:hover {
-            background-color: #c0392b;
+        .popup-img {
+            width: 100%;
+            max-width: 240px;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+            margin: 5px auto;
         }
 
         /* Modal upload */
-        #uploadModal {
+        #uploadModal,
+        #beforeModal {
             display: none;
             position: fixed;
             top: 0; left: 0;
@@ -53,7 +56,7 @@
             z-index: 1000;
         }
 
-        #uploadModal .modal-content {
+        .modal-content {
             background: #fff;
             padding: 20px;
             border-radius: 10px;
@@ -61,7 +64,7 @@
             text-align: center;
         }
 
-        #uploadModal button {
+        .modal-content button {
             margin: 5px;
         }
     </style>
@@ -93,7 +96,7 @@
     <p>&copy; 2026 Trashmon Go - Tous droits réservés</p>
 </footer>
 
-<!-- Modal upload -->
+<!-- Modal photo APRÈS -->
 <div id="uploadModal">
     <div class="modal-content">
         <h3>📸 Preuve de nettoyage</h3>
@@ -112,7 +115,6 @@
         <button onclick="closeBeforeModal()">Annuler</button>
     </div>
 </div>
-
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -136,18 +138,28 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 map.options.closePopupOnClick = false;
 
-
 L.Popup.prototype.options.maxWidth = 280;
 L.Popup.prototype.options.minWidth = 200;
-L.Popup.prototype.options.maxHeight = 320; // 👈 clé pour le scroll
+L.Popup.prototype.options.maxHeight = 320;
 
-
-
-const dateFixe = "22/01/2026";
 let selectedMarker = null;
 let pendingLatLng = null;
 let pendingType = null;
 const LIKES_REQUIRED = 3;
+
+/* ==========================
+   🔴 POINTS ROUGES "EN DUR"
+========================== */
+const dechetsRouges = [
+    [48.382, -4.494],
+    [48.371, -4.477],
+    [48.405, -4.515],
+    [48.360, -4.450]
+];
+
+dechetsRouges.forEach(coord => {
+    createRedMarker(coord, "Déchet inconnu", null);
+});
 
 /* ==========================
    🔴 CRÉATION POINT ROUGE
@@ -222,18 +234,23 @@ function createRedMarker(latlng, type, beforePhoto) {
 
     marker.status = "red";
     marker.likes = 0;
-    marker.beforePhoto = beforePhoto;
+    marker.beforePhoto = beforePhoto || null;
     marker.afterPhoto = null;
+    marker.type = type;
 
-    marker.bindPopup(getRedPopup(marker, type));
+    marker.bindPopup(getRedPopup(marker));
     marker.on("click", () => selectedMarker = marker);
 }
 
-function getRedPopup(marker, type) {
+function getRedPopup(marker) {
+    const photoHTML = marker.beforePhoto
+        ? `<img src="${marker.beforePhoto}" class="popup-img"><br><br>`
+        : `<em>Aucune photo avant disponible</em><br><br>`;
+
     return `
-        🔴 ${type}<br>
+        🔴 ${marker.type}<br>
         <em>Date : ${new Date().toLocaleString()}</em><br><br>
-        <img src="${marker.beforePhoto}" style="width:100%;border-radius:6px"><br><br>
+        ${photoHTML}
         <button onclick="markAsCleaned()">Je l’ai nettoyée</button>
     `;
 }
@@ -294,7 +311,8 @@ function updateOrangePopup(marker) {
         👍 Vérifications : ${marker.likes} / ${LIKES_REQUIRED}<br><br>
 
         <strong>Avant :</strong><br>
-        <img src="${marker.beforePhoto}" class="popup-img"><br>
+        ${marker.beforePhoto ? `<img src="${marker.beforePhoto}" class="popup-img">` : `<em>Non disponible</em>`}
+        <br><br>
 
         <strong>Après :</strong><br>
         <img src="${marker.afterPhoto}" class="popup-img"><br><br>
@@ -304,7 +322,6 @@ function updateOrangePopup(marker) {
 
     marker.openPopup();
 }
-
 
 /* ==========================
    👍 VALIDATION COMMUNAUTAIRE
@@ -344,7 +361,6 @@ function passToGreen(marker) {
 
     marker.openPopup();
 }
-
 </script>
 
 </body>
