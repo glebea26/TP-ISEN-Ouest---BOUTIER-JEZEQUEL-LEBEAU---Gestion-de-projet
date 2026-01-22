@@ -17,10 +17,14 @@ header {
 }
 
 header h1 {
-    font-family: 'Pokemon Hollow/Solid';
+    font-family: 'Pokemon Hollow/Solid', sans-serif;
     margin: 0;
-    color: white; /* Force le titre en blanc dans le header */
-    font-size: 2rem;
+    font-size: 3rem; 
+    letter-spacing: 2px; 
+    color: #b2ff59;
+    -webkit-text-stroke: 2.5px #1b5e20; 
+    text-shadow: 4px 4px 0px #0d3b12;
+    paint-order: stroke fill;
 }
 
 header p {
