@@ -80,7 +80,7 @@
 </footer>
 
 <!-- POPUP RÔLE -->
-<div id="role-popup">
+<div id="role-popup" style="display:none;">
     <div id="role-popup-content">
         <h2>Choisissez votre rôle</h2>
 
@@ -100,27 +100,39 @@
 
 <script>
 /* ==========================
-   🍪 COOKIES
+   🍪 GESTION DES COOKIES
 ========================== */
-function setCookie(name,value){
-    document.cookie = name + "=" + value + ";path=/";
+function setCookie(name,value,days=365){
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = name + "=" + value + ";expires=" + d.toUTCString() + ";path=/";
 }
-function deleteCookie(name){
-    document.cookie = name + "=; Max-Age=0; path=/";
+function getCookie(name){
+    const cname = name + "=";
+    const decoded = decodeURIComponent(document.cookie);
+    const ca = decoded.split(';');
+    for(let c of ca){
+        c = c.trim();
+        if(c.indexOf(cname) === 0) return c.substring(cname.length);
+    }
+    return "";
 }
 
 /* ==========================
-   🔄 FORCER LE CHOIX À CHAQUE REFRESH
+   ▶️ AFFICHER LE RÔLE OU LE POPUP
 ========================== */
-deleteCookie("userRole");
-
-/* ==========================
-   🎭 RÔLE UTILISATEUR
-========================== */
-const roleSelect = document.getElementById("role-select");
-const passwordBox = document.getElementById("admin-password-container");
 const rolePopup = document.getElementById("role-popup");
 const roleDisplay = document.getElementById("user-role-display");
+const roleSelect = document.getElementById("role-select");
+const passwordBox = document.getElementById("admin-password-container");
+
+const savedRole = getCookie("userRole");
+
+if(savedRole){
+    roleDisplay.innerText = "Rôle : " + (savedRole === "admin" ? "Admin" : "Utilisateur");
+}else{
+    rolePopup.style.display = "flex"; // montre le popup
+}
 
 roleSelect.addEventListener("change", () => {
     passwordBox.style.display = roleSelect.value === "admin" ? "block" : "none";
@@ -128,21 +140,17 @@ roleSelect.addEventListener("change", () => {
 
 document.getElementById("role-confirm").addEventListener("click", () => {
     const role = roleSelect.value;
-
-    if (!role) {
-        alert("Veuillez choisir un rôle");
-        return;
-    }
+    if (!role) { alert("Veuillez choisir un rôle"); return; }
 
     if (role === "admin") {
         const pwd = document.getElementById("admin-password").value;
-        if (pwd !== "trashmon123") {
-            alert("Mot de passe incorrect → utilisateur");
-            setCookie("userRole","user");
-            roleDisplay.innerText = "Rôle : Utilisateur";
-        } else {
+        if (pwd === "trashmon123") {
             setCookie("userRole","admin");
             roleDisplay.innerText = "Rôle : Admin";
+        } else {
+            alert("Mot de passe incorrect → Utilisateur standard");
+            setCookie("userRole","user");
+            roleDisplay.innerText = "Rôle : Utilisateur";
         }
     } else {
         setCookie("userRole","user");
@@ -162,13 +170,3 @@ document.getElementById("start-button").onclick = () => {
 
 </body>
 </html>
-
-
-
-
-
-
-    
-
-    
-

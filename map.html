@@ -6,7 +6,7 @@
 <title>Carte des zones polluées – Littoral de Brest</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="styles.css" /> <!-- ✅ STYLE RESTAURÉ -->
+<link rel="stylesheet" href="styles.css" />
 
 <style>
 body { margin:0;font-family:Arial,sans-serif; }
@@ -102,6 +102,21 @@ body { margin:0;font-family:Arial,sans-serif; }
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ==========================
+// 🍪 RÉCUPÉRATION DU RÔLE
+// ==========================
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  return parts.length === 2 ? parts.pop().split(';').shift() : "";
+}
+
+const userRole = getCookie("userRole");
+const isAdmin = (userRole === "admin");
+
+// ==========================
+// INITIALISATION DE LA CARTE
+// ==========================
 const littoralBrestBounds = L.latLngBounds([[48.32,-4.65],[48.45,-4.35]]);
 const map = L.map('map',{maxBounds:littoralBrestBounds,maxBoundsViscosity:1,minZoom:12,maxZoom:17});
 map.fitBounds(littoralBrestBounds);
@@ -265,11 +280,35 @@ function likeZone(){
 function passToGreen(marker){
   marker.status="green";
   marker.setStyle({radius:8,color:'#1e8449',fillColor:'#2ecc71'});
+
+  let adminButton = "";
+  if(isAdmin){
+    adminButton = `<br><button onclick="deleteGreenPoint()">🗑️ Supprimer ce point</button>`;
+  }
+
+  // Affiche toujours la date
+  const dateStr = new Date().toLocaleString();
+
   marker.bindPopup(`
-    🟢 Déchets récupérés<br><em>${new Date().toLocaleString()}</em><br><br>
+    🟢 Déchets récupérés<br>
+    <em>${dateStr}</em><br><br>
     <img src="${marker.afterPhoto}" class="popup-img">
+    ${adminButton}
   `);
+
   marker.openPopup();
+}
+
+/* ==========================
+   🟢 SUPPRESSION POINT VERT (ADMIN)
+========================== */
+function deleteGreenPoint(){
+  if(!isAdmin || !selectedMarker) return;
+  const confirmDelete = confirm("Supprimer définitivement ce point ?");
+  if(confirmDelete){
+    map.removeLayer(selectedMarker);
+    selectedMarker = null;
+  }
 }
 
 /* ==========================
@@ -285,11 +324,16 @@ function passToGreen(marker){
 
   m.status="green";
   m.afterPhoto="https://via.placeholder.com/300x200?text=Après";
+  const dateStr = new Date().toLocaleString();
 
   m.bindPopup(`
-    🟢 Déchets récupérés<br><br>
+    🟢 Déchets récupérés<br>
+    <em>22/01/2026</em><br><br>
     <img src="${m.afterPhoto}" class="popup-img">
+    ${isAdmin ? '<br><button onclick="deleteGreenPoint()">🗑️ Supprimer ce point</button>' : ''}
   `);
+
+  m.on("click",()=>selectedMarker=m);
 });
 
 /* ==========================
@@ -323,3 +367,4 @@ function passToGreen(marker){
 </script>
 </body>
 </html>
+
