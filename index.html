@@ -5,93 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trashmon Go</title>
     <link rel="stylesheet" href="styles.css">
-
-    <style>
-        /* Styles existants */
-        #role-popup {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        #role-popup-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 300px;
-        }
-        #role-popup select, #role-popup input, #role-popup button {
-            padding: 10px; margin-top: 10px; width: 100%; font-size: 16px;
-        }
-        #admin-password-container { display: none; }
-
-        /* --- NOUVEAUX STYLES DU COMPTEUR LIVE --- */
-        .live-counter-container {
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 500px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
-
-        .live-badge {
-            display: inline-block;
-            background: #ff4757;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .counter-total {
-            font-size: 24px;
-            color: #2e7d32;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .live-event {
-            font-size: 14px;
-            color: #555;
-            padding: 10px;
-            background: #f9f9f9;
-            border-left: 4px solid #4CAF50;
-            border-radius: 4px;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            transition: all 0.5s ease;
-        }
-
-        .event-time {
-            font-size: 11px;
-            color: #999;
-            margin-bottom: 4px;
-        }
-
-        .event-msg b {
-            color: #4CAF50;
-        }
-    </style>
 </head>
 
 <body>
@@ -100,9 +13,9 @@
     <h1 class="trashmon">Trashmon Go</h1>
     <p>Attrape-les tous... avant qu'ils n'atteignent la mer !</p>
     <nav>
-        <a href="index.html" class="active">Accueil</a> |
+        <a href="index.html">Accueil</a> |
         <a href="map.html">Carte</a> |
-        <a href="gallerie.html">Galerie</a> |
+        <a href="capture.html">Galerie</a> |
         <a href="collection.html">Collection</a> |
         <a href="profile.html">Profil</a>
     </nav>
@@ -171,24 +84,20 @@ const trashmonTypes = [
     "Verre Coupant"
 ];
 
-let totalTrashmons = 12482; // Nombre de départ
+let totalTrashmons = 12482;
 
 function updateLiveFeed() {
-    // 1. Incrémenter le total aléatoirement
     const added = Math.floor(Math.random() * 3) + 1;
     totalTrashmons += added;
     document.getElementById('total-trashmons').innerText = totalTrashmons.toLocaleString();
 
-    // 2. Générer une date/heure
     const maintenant = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
     const dateLabel = maintenant.toLocaleDateString('fr-FR', options);
 
-    // 3. Choisir un Trashmon et un nombre de personnes
     const type = trashmonTypes[Math.floor(Math.random() * trashmonTypes.length)];
     const nbPers = Math.floor(Math.random() * 5) + 1;
 
-    // 4. Mettre à jour l'affichage avec une petite animation
     const eventBox = document.getElementById('live-event-box');
     eventBox.style.opacity = "0";
 
@@ -198,16 +107,13 @@ function updateLiveFeed() {
         eventBox.style.opacity = "1";
     }, 500);
 
-    // 5. Relancer la fonction aléatoirement entre 4 et 8 secondes
     setTimeout(updateLiveFeed, (Math.random() * 4000) + 4000);
 }
 
-// Lancer le flux au chargement
 updateLiveFeed();
 
-
 /* ==========================
-    🍪 GESTION DES COOKIES (Existant)
+    🍪 GESTION DES COOKIES
 ========================== */
 function setCookie(name, value, days=365){
     const d = new Date();
