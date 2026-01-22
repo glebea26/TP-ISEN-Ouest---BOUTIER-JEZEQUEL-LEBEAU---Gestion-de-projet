@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trashmon Go</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Style du popup de sélection */
+        #role-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        #role-popup-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 300px;
+        }
+        #role-popup select, #role-popup input, #role-popup button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+            font-size: 16px;
+        }
+        #admin-password-container {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -14,18 +45,16 @@
     <nav>
         <a href="index.html">Accueil</a> |
         <a href="map.html">Carte</a> |
-        <a href="capture.html">Galerie</a> |
+        <a href="capture.html">Capture</a> |
         <a href="collection.html">Collection</a> |
         <a href="profile.html">Profil</a>
     </nav>
 </header>
 
 <main>
-    
-    <div class="hero">
-        <img <img src="ressources/trashmons/Image accueil.png" alt="Illustration Trashmon Go" class="hero-image">
+    <div class="trashmon-card">
+        <img src="ressources/trashmons/Image accueil.png">
     </div>
-    
     <section class="cta">
         <button id="start-button">🌱 Commencer à nettoyer</button>
         <p>Rejoignez la communauté pour sauver le littoral !</p>
@@ -45,13 +74,106 @@
     <p>&copy; 2026 Trashmon Go - Tous droits réservés</p>
 </footer>
 
+<!-- Popup pour choisir le rôle -->
+<div id="role-popup" style="display:none;">
+    <div id="role-popup-content">
+        <h2>Choisissez votre rôle</h2>
+        <select id="role-select">
+            <option value="">-- Sélectionnez --</option>
+            <option value="admin">Admin</option>
+            <option value="user">Utilisateur</option>
+        </select>
+
+        <!-- Champ mot de passe pour admin -->
+        <div id="admin-password-container">
+            <input type="password" id="admin-password" placeholder="Entrez le mot de passe">
+        </div>
+
+        <button id="role-confirm">Confirmer</button>
+    </div>
+</div>
+
 <script>
     document.getElementById("start-button").addEventListener("click", function () {
         window.location.href = "map.html";
     });
+
+    // Gestion des cookies
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    function getCookie(name) {
+        const cname = name + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const ca = decodedCookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+            let c = ca[i].trim();
+            if (c.indexOf(cname) == 0) {
+                return c.substring(cname.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function checkUserProfile() {
+        let userRole = getCookie("userRole");
+
+        if (!userRole) {
+            document.getElementById("role-popup").style.display = "flex";
+
+            const roleSelect = document.getElementById("role-select");
+            const adminPasswordContainer = document.getElementById("admin-password-container");
+
+            // Afficher le champ mot de passe seulement si admin est choisi
+            roleSelect.addEventListener("change", function() {
+                if (roleSelect.value === "admin") {
+                    adminPasswordContainer.style.display = "block";
+                } else {
+                    adminPasswordContainer.style.display = "none";
+                }
+            });
+
+            document.getElementById("role-confirm").addEventListener("click", function() {
+                const selectedRole = roleSelect.value;
+
+                if (selectedRole === "") {
+                    alert("Veuillez choisir un rôle.");
+                    return;
+                }
+
+                if (selectedRole === "admin") {
+                    const password = document.getElementById("admin-password").value;
+                    if (password === "trashmon123") {
+                        setCookie("userRole", "admin", 1);
+                        document.getElementById("role-popup").style.display = "none";
+                    } else {
+                        alert("Mot de passe incorrect ! Vous serez connecté comme utilisateur standard.");
+                        setCookie("userRole", "user", 1);
+                        document.getElementById("role-popup").style.display = "none";
+                    }
+                } else {
+                    setCookie("userRole", "user", 1);
+                    alert("Bienvenue utilisateur !");
+                    document.getElementById("role-popup").style.display = "none";
+                }
+            });
+        } else {
+            console.log("Rôle déjà défini : " + userRole);
+        }
+    }
+
+    window.onload = checkUserProfile;
 </script>
 
 </body>
 </html>
+
+
+    
+
     
 
