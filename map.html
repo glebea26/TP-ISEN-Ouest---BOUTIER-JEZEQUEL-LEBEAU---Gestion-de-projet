@@ -50,12 +50,6 @@ body { margin:0;font-family:Arial,sans-serif; }
 }
 
 .modal-content button { margin:5px; }
-
-.bravo-popup .leaflet-popup-content-wrapper {
-  background:#f1c40f !important;
-  border-radius:10px !important;
-  text-align:center;
-}
 </style>
 </head>
 
@@ -65,7 +59,7 @@ body { margin:0;font-family:Arial,sans-serif; }
 <h1>Carte des zones polluées</h1>
 <nav>
 <a href="index.html">Accueil</a> |
-<a href="map.html" class="active">Carte</a> |
+<a href="map.html">Carte</a> |
 <a href="gallerie.html">Galerie</a> |
 <a href="collection.html">Collection</a> |
 <a href="profile.html">Profil</a>
@@ -109,14 +103,28 @@ body { margin:0;font-family:Arial,sans-serif; }
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ==========================
-// 🍪 RÉCUPÉRATION DU RÔLE
+// 🍪 GESTION DES COOKIES
 // ==========================
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  return parts.length === 2 ? parts.pop().split(';').shift() : "";
+function setCookie(name,value,days=365){
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = name + "=" + value + ";path=/;expires=" + d.toUTCString();
 }
 
+function getCookie(name){
+    const cname = name + "=";
+    const decoded = decodeURIComponent(document.cookie);
+    const ca = decoded.split(';');
+    for(let c of ca){
+        c = c.trim();
+        if(c.indexOf(cname) === 0) return c.substring(cname.length);
+    }
+    return "";
+}
+
+// ==========================
+// 🍪 RÉCUPÉRATION DU RÔLE (admin ou user)
+// ==========================
 const userRole = getCookie("userRole");
 const isAdmin = (userRole === "admin");
 
@@ -200,7 +208,6 @@ function closeBeforeModal(){
   document.getElementById("beforeModal").style.display="none";
   document.getElementById("beforePhotoInput").value="";
 }
-
 function closeModal(){
   document.getElementById("uploadModal").style.display="none";
   document.getElementById("photoInput").value="";
@@ -213,7 +220,6 @@ function createRedMarker(latlng,type,beforePhoto){
   const marker=L.circleMarker(latlng,{
     radius:10,color:'#c0392b',fillColor:'#e74c3c',fillOpacity:.9,weight:2
   }).addTo(map);
-
   marker.status="red";
   marker.likes=0;
   marker.beforePhoto=beforePhoto;
@@ -226,7 +232,6 @@ function createRedMarker(latlng,type,beforePhoto){
     <img src="${marker.beforePhoto}" class="popup-img"><br>
     <button onclick="markAsCleaned()">Je l’ai nettoyée</button>
   `);
-
   marker.on("click",()=>selectedMarker=marker);
 }
 
@@ -275,13 +280,11 @@ function likeZone(){
   selectedMarker.likes++;
   if(selectedMarker.likes>=LIKES_REQUIRED){
     passToGreen(selectedMarker);
-  } else {
-    updateOrangePopup(selectedMarker);
-  }
+  } else { updateOrangePopup(selectedMarker); }
 }
 
 /* ==========================
-   🟢 PASSAGE VERT + POPUP BRAVO
+   🟢 PASSAGE VERT + BRAVO
 ========================= */
 function passToGreen(marker){
   marker.status="green";
@@ -290,7 +293,6 @@ function passToGreen(marker){
   let adminButton = isAdmin ? `<br><button onclick="deleteGreenPoint()">🗑️ Supprimer ce point</button>` : "";
   const dateStr = new Date().toLocaleString();
 
-  // Mettre à jour popup principal
   marker.bindPopup(`
     🟢 Déchets récupérés<br>
     <em>${dateStr}</em><br><br>
@@ -299,18 +301,22 @@ function passToGreen(marker){
   `);
   marker.openPopup();
 
-  // Popup BRAVO avec Pokémon
-  const randomIndex = Math.floor(Math.random() * trashmons.length);
-  const pokemonImg = trashmons[randomIndex];
+  // Vérifie cookie pour BRAVO Trashmon
+  if(!getCookie("lastTrashmon")){
+      const randomIndex = Math.floor(Math.random() * trashmons.length);
+      const pokemonImg = trashmons[randomIndex];
+      setCookie("lastTrashmon", pokemonImg, 1); // valable 1 jour
 
-  L.popup({closeButton:true,autoClose:true,className:'bravo-popup'})
-    .setLatLng(marker.getLatLng())
-    .setContent(`
-      <h3>🎉 Bravo !</h3>
-      <p>Vous avez gagné un Trashmon !</p>
-      <img src="${pokemonImg}" class="popup-img">
-    `)
-    .openOn(map);
+      // Popup BRAVO
+      L.popup({closeButton:true,autoClose:true,className:'bravo-popup'})
+        .setLatLng(marker.getLatLng())
+        .setContent(`
+          <h3>🎉 Bravo !</h3>
+          <p>Vous avez gagné un Trashmon !</p>
+          <img src="${pokemonImg}" class="popup-img">
+        `)
+        .openOn(map);
+  }
 }
 
 /* ==========================
@@ -320,7 +326,7 @@ function deleteGreenPoint(){
   if(!isAdmin || !selectedMarker) return;
   if(confirm("Supprimer définitivement ce point ?")){
     map.removeLayer(selectedMarker);
-    selectedMarker = null;
+    selectedMarker=null;
   }
 }
 
@@ -336,10 +342,9 @@ function deleteGreenPoint(){
   }).addTo(map);
   m.status="green";
   m.afterPhoto="https://via.placeholder.com/300x200?text=Après";
-  const dateStr = "22/01/2026";
   m.bindPopup(`
     🟢 Déchets récupérés<br>
-    <em>${dateStr}</em><br><br>
+    <em>22/01/2026</em><br><br>
     <img src="${m.afterPhoto}" class="popup-img">
     ${isAdmin ? '<br><button onclick="deleteGreenPoint()">🗑️ Supprimer ce point</button>' : ''}
   `);
