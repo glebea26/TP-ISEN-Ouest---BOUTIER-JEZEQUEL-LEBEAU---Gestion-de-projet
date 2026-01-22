@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte des zones polluées – Littoral de Brest</title>
 
-    <!-- Leaflet CSS -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
 
-    <!-- Ton CSS -->
     <link rel="stylesheet" href="styles.css">
 
     <style>
@@ -20,11 +18,7 @@
             font-family: Arial, sans-serif;
         }
 
-        header, footer {
-            text-align: center;
-            padding: 10px;
-        }
-
+        /* Le style spécifique à la carte reste ici */
         .map-container {
             padding: 20px;
         }
@@ -33,23 +27,32 @@
             height: 500px;
             width: 100%;
             border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
 
-<header>
+<header class="banner">
     <h1>Carte des zones polluées</h1>
+    <nav>
+        <a href="index.html">Accueil</a> |
+        <a href="map.html">Carte</a> |
+        <a href="capture.html">Capture</a> |
+        <a href="collection.html">Collection</a> |
+        <a href="profile.html">Profil</a>
+    </nav>
 </header>
 
 <main>
     <div class="map-container">
         <h2>Repérez les zones polluées du littoral de Brest</h2>
 
-        <!-- Carte -->
         <div id="map" class="map"></div>
 
-        <p>🔴 Déchets à ramasser | 🟢 Déchets récupérés</p>
+        <p style="text-align: center; margin-top: 15px;">
+            <strong>Objectif :</strong> Choisissez une zone rouge pour commencer votre nettoyage !
+        </p>
     </div>
 </main>
 
@@ -57,77 +60,40 @@
     <p>&copy; 2026 Trashmon Go - Tous droits réservés</p>
 </footer>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    // Limites du littoral de Brest
+    // Limites du littoral de Brest (zone jouable)
     const littoralBrestBounds = L.latLngBounds(
-        [48.32, -4.65],
-        [48.45, -4.35]
+        [48.32, -4.65], // Sud-Ouest
+        [48.45, -4.35]  // Nord-Est
     );
 
     // Initialisation de la carte
     const map = L.map('map', {
         maxBounds: littoralBrestBounds,
-        maxBoundsViscosity: 1.0,
+        maxBoundsViscosity: 1.0, // empêche de sortir de la zone
         minZoom: 12,
         maxZoom: 17
     });
 
+    // Centrage et zoom automatique sur le littoral
     map.fitBounds(littoralBrestBounds);
 
-    // Fond OpenStreetMap
+    // Fond de carte OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    /* ==========================
-       🔴 Déchets à ramasser
-    ========================== */
-    const dechetsRouges = [
-        [48.382, -4.494],
-        [48.371, -4.477],
-        [48.405, -4.515],
-        [48.360, -4.450]
-    ];
+    // Exemple : Ajout d'un marqueur de zone polluée (Cercle rouge)
+    L.circle([48.39, -4.48], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 500
+    }).addTo(map).bindPopup("Zone très polluée - Port de Brest");
 
-    dechetsRouges.forEach(coord => {
-        L.circleMarker(coord, {
-            radius: 10,
-            color: '#c0392b',
-            fillColor: '#e74c3c',
-            fillOpacity: 0.9,
-            weight: 2
-        })
-        .addTo(map)
-        .bindPopup("🔴 Déchets à ramasser");
-    });
-
-    /* ==========================
-       🟢 Déchets récupérés
-    ========================== */
-    const dechetsVerts = [
-        [48.388, -4.502],
-        [48.365, -4.468],
-        [48.410, -4.480]
-    ];
-
-    dechetsVerts.forEach(coord => {
-        L.circleMarker(coord, {
-            radius: 8,
-            color: '#1e8449',
-            fillColor: '#2ecc71',
-            fillOpacity: 0.9,
-            weight: 2
-        })
-        .addTo(map)
-        .bindPopup("🟢 Déchets récupérés");
-    });
 </script>
 
 </body>
 </html>
-
-
-
